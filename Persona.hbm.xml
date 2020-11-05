@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 05-nov-2020 17:39:25 by Hibernate Tools 3.5.0.Final -->
+<hibernate-mapping>
+    <class name="com.example.persistence.Persona" table="PERSONA">
+        <id name="apellido" type="java.lang.String">
+            <column name="APELLIDO" />
+            <generator class="assigned" />
+        </id>
+        <property name="nif" type="java.lang.String">
+            <column name="NIF" />
+        </property>
+        <property name="nombre" type="java.lang.String">
+            <column name="NOMBRE" />
+        </property>
+        <property name="edad" type="int">
+            <column name="EDAD" />
+        </property>
+        <property name="sexo" type="char">
+            <column name="SEXO" />
+        </property>
+        <many-to-one name="direccion" class="com.example.persistence.Direccion" fetch="join">
+            <column name="DIRECCION" />
+        </many-to-one>
+        <property name="estadoCivil">
+            <column name="ESTADOCIVIL" />
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.example.persistence.EstadoCivil</param>
+            </type>
+        </property>
+        <property name="fechaNacimiento" type="java.util.Date">
+            <column name="FECHANACIMIENTO" />
+        </property>
+        <property name="cv" type="java.lang.String">
+            <column name="CV" />
+        </property>
+    </class>
+</hibernate-mapping>
