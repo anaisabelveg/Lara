@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow xmlns="http://www.springframework.org/schema/webflow"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/webflow
+        http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
+
+	<view-state id="paso1" view="paso1">
+		<transition on="ok" to="paso2" />
+	</view-state>
+
+	<view-state id="paso2" view="paso2">
+		<transition on="volver" to="paso1" />
+		<transition on="ok" to="paso3" />
+	</view-state>
+
+	<view-state id="paso3" view="paso3">
+		<transition on="volver" to="paso2" />
+		<transition on="ok" to="paso4" />
+	</view-state>
+
+	<view-state id="paso4" view="paso4">
+		<transition on="volver" to="paso3" />
+		<transition on="ok" to="paso5" />
+	</view-state>
+
+	<end-state id="paso5" view="resumen" />
+
+
+</flow>

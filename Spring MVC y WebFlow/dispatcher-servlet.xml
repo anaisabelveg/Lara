@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:webflow-config="http://www.springframework.org/schema/webflow-config"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/mvc
+		http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/webflow-config 
+		http://www.springframework.org/schema/webflow-config/spring-webflow-config-2.3.xsd">
+
+	<!-- Para que se puedan cargar las imagenes y los archivos css -->
+	<mvc:resources location="/static/" mapping="/static/**" />
+
+	<!-- Bean para cargar el archivo de mensajes -->
+	<!-- id="messageSource" obligatorio y con ese nombre -->
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename">
+			<value>mensajes</value>
+		</property>
+	</bean>
+
+	<context:annotation-config />
+	<context:component-scan base-package="es.indra" />
+
+	<mvc:annotation-driven />
+
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/JSP/"></property>
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+
+	<!-- Cargamos el archivo de porpiedades -->
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:data-source.properties</value>
+			</list>
+		</property>
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+	</bean>
+
+	<bean id="miDataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="${driver}" />
+		<property name="url" value="${url}" />
+		<property name="username" value="${user}" />
+		<property name="password" value="${password}" />
+	</bean>
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="miDataSource" />
+		<property name="mappingLocations" value="classpath:es/indra/modelo/*.hbm.xml" />
+		<property name="hibernateProperties">
+			<props>
+				<!-- Estrategia de generacion de tablas -->
+				<prop key="hibernate.hbm2ddl.auto">validate</prop>
+				<!-- Muestra las que -->
+				<prop key="hibernate.show_sql">true</prop>
+				<!-- Dilecto de hibernate -->
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- A partir de la version 4 de hibernate, HibernateTemplate necesita de 
+		trasacciones -->
+
+	<bean id="txManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<bean id="miTemplate" class="org.springframework.orm.hibernate4.HibernateTemplate">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<!-- Crear una factoria de vistas -->
+	<bean id="viewFactoryCreator"
+		class="org.springframework.webflow.mvc.builder.MvcViewFactoryCreator">
+		<property name="viewResolvers">
+			<list>
+				<ref bean="viewResolver" />
+			</list>
+		</property>
+	</bean>
+
+	<!-- Contenedor para los servicios necesarioos durante la construccion del 
+		flujo, asi como la creación de factorias de vista ViewFactoryCreator -->
+	<webflow-config:flow-builder-services
+		id="flowBuilderServices" view-factory-creator="viewFactoryCreator" />
+
+	<!-- necesitamos un registro de flujos para localizar los .xml -->
+	<webflow-config:flow-registry id="flowRegistry"
+		flow-builder-services="flowBuilderServices">
+		<webflow-config:flow-location id="inicio"
+			path="/WEB-INF/flujos/principal-flow.xml" />
+	</webflow-config:flow-registry>
+
+	<!-- El ejecutor de flujos se encarga de crear y ejecutar
+        una instancia del flujo por cada usuario -->
+   <webflow-config:flow-executor id="flowExecutor"
+             flow-registry="flowRegistry"/>
+    
+    <!-- Dirige las peticiones desde el DispatcherServlet
+         al flujo -->
+	<bean class="org.springframework.webflow.mvc.servlet.FlowHandlerMapping" >
+		<property name="flowRegistry" ref="flowRegistry"/>
+	</bean>
+	
+	<!-- Responde a las peticiones -->
+	<bean class="org.springframework.webflow.mvc.servlet.FlowHandlerAdapter">
+	    <property name="flowExecutor" ref="flowExecutor" />
+	</bean>
+	
+	<!-- Controller para manejar los flujos -->
+	<bean id="flowController"
+	      class="org.springframework.webflow.mvc.servlet.FlowController">
+	      <property name="flowExecutor" ref="flowExecutor"/>
+	</bean>
+	
+	<!-- Entrar al flujo -->
+	<bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="mappings">
+			<value>inicio.flow=flowController</value>
+		</property>
+		<property name="alwaysUseFullPath" value="true"/>
+	</bean>
+</beans>
