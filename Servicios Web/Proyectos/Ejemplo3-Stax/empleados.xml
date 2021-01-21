@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<empleados>
+	<empleado>
+		<id>00132</id>
+		<nombre>Antonio Lopez</nombre>
+		<direccion>
+			<calle>Mayor</calle>
+			<ciudad>Madrid</ciudad>
+			<codigo_postal>28014</codigo_postal>
+		</direccion>
+		<email>antonio@gmail.com</email>
+		<dpto>Ventas</dpto>
+		<sueldo>45000</sueldo>
+	</empleado>
+</empleados>
